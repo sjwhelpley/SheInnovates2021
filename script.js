@@ -1,5 +1,6 @@
 !function() {
     var today = moment();
+    var currentDay = "";
   
     function Calendar(selector, events) {
       this.el = document.querySelector(selector);
@@ -16,21 +17,18 @@
     }
   
     Calendar.prototype.draw = function() {
-      //Create Header
+      // Create Header
       this.drawHeader();
   
-      //Draw Month
+      // Draw Month
       this.drawMonth();
-  
-      // this.drawLegend();
     }
   
     Calendar.prototype.drawHeader = function() {
       var self = this;
       if(!this.header) {
-        //Create the header elements
+        // Create the header elements
         this.header = createElement('div', 'header');
-        this.header.className = 'header';
   
         this.title = createElement('h1');
   
@@ -138,7 +136,6 @@
       //Day Number
       var number = createElement('div', 'day-number', day.format('DD'));
   
-  
       //Events
       var events = createElement('div', 'day-events');
       this.drawEvents(day, events);
@@ -176,19 +173,20 @@
     }
   
     Calendar.prototype.openDay = function(el) {
+        currentDay = el;
       var details, arrow;
       var dayNumber = +el.querySelectorAll('.day-number')[0].innerText || +el.querySelectorAll('.day-number')[0].textContent;
       var day = this.current.clone().date(dayNumber);
   
       var currentOpened = document.querySelector('.details');
   
-      //Check to see if there is an open detais box on the current row
+      // Check to see if there is an open detais box on the current row
       if(currentOpened && currentOpened.parentNode === el.parentNode) {
         details = currentOpened;
         arrow = document.querySelector('.arrow');
       } else {
-        //Close the open events on differnt week row
-        //currentOpened && currentOpened.parentNode.removeChild(currentOpened);
+        // Close the open events on differnt week row
+        // currentOpened && currentOpened.parentNode.removeChild(currentOpened);
         if(currentOpened) {
           currentOpened.addEventListener('webkitAnimationEnd', function() {
             currentOpened.parentNode.removeChild(currentOpened);
@@ -205,14 +203,13 @@
           currentOpened.className = 'details out';
         }
   
-        //Create the Details Container
+        // Create the Details Container
         details = createElement('div', 'details in');
   
-        //Create the arrow
+        // Create the arrow
         var arrow = createElement('div', 'arrow');
   
-        //Create the event wrapper
-  
+        // Create the event wrapper
         details.appendChild(arrow);
         el.parentNode.appendChild(details);
       }
@@ -246,7 +243,7 @@
   
       if(!events.length) {
         var div = createElement('div', 'event empty');
-        var span = createElement('span', '', 'No Events');
+        var span = createElement('span', '', 'No Self-Care');
   
         div.appendChild(span);
         wrapper.appendChild(div);
@@ -275,23 +272,6 @@
       }
     }
   
-    Calendar.prototype.drawLegend = function() {
-      var legend = createElement('div', 'legend');
-      var calendars = this.events.map(function(e) {
-        return e.calendar + '|' + e.color;
-      }).reduce(function(memo, e) {
-        if(memo.indexOf(e) === -1) {
-          memo.push(e);
-        }
-        return memo;
-      }, []).forEach(function(e) {
-        var parts = e.split('|');
-        var entry = createElement('span', 'entry ' +  parts[1], parts[0]);
-        legend.appendChild(entry);
-      });
-      this.el.appendChild(legend);
-    }
-  
     Calendar.prototype.nextMonth = function() {
       this.current.add('months', 1);
       this.next = true;
@@ -306,6 +286,46 @@
   
     window.Calendar = Calendar;
   
+    function SelfCareList(selector, events) {
+      this.el = document.querySelector(selector);
+      this.events = events;
+      this.current = moment().date(1);
+      this.draw();
+    }
+
+    SelfCareList.prototype.draw = function() {
+        var self = this;
+        if(!this.list) {
+            this.title = createElement('h1', 'list-title');
+            this.title.innerHTML = 'What have you done for yourself today?';
+            this.el.appendChild(this.title);
+
+            this.events.forEach(event => {
+                var eventItem = createElement('div', 'list-item');
+                eventItem.innerHTML = event.eventName;
+                eventItem.addEventListener('click', function() { self.addItem(event); });
+                this.el.appendChild(eventItem);
+            });
+        }
+    }
+
+    SelfCareList.prototype.addItem = function(event) {
+        var currentOpened = document.querySelector('.events');
+        currentOpened.removeChild(currentOpened.firstChild);
+
+        var div = createElement('div', 'event');
+        var span = createElement('span', '', event.eventName);
+  
+        div.appendChild(span);
+        currentOpened.appendChild(div);
+
+        var eventSpan = createElement('span', event.color);
+        var dayEvent = currentDay.children[2];
+        dayEvent.appendChild(eventSpan);
+    }
+
+    window.SelfCareList = SelfCareList;
+    
     function createElement(tagName, className, innerText) {
       var ele = document.createElement(tagName);
       if(className) {
@@ -316,34 +336,17 @@
       }
       return ele;
     }
-  }();
+}();
   
-  !function() {
+!function() {
     var data = [
       { eventName: 'Lunch Meeting w/ Mark', calendar: 'Work', color: 'orange' },
       { eventName: 'Interview - Jr. Web Developer', calendar: 'Work', color: 'orange' },
       { eventName: 'Demo New App to the Board', calendar: 'Work', color: 'orange' },
       { eventName: 'Dinner w/ Marketing', calendar: 'Work', color: 'orange' },
-  
-      { eventName: 'Game vs Portalnd', calendar: 'Sports', color: 'blue' },
-      { eventName: 'Game vs Houston', calendar: 'Sports', color: 'blue' },
-      { eventName: 'Game vs Denver', calendar: 'Sports', color: 'blue' },
-      { eventName: 'Game vs San Degio', calendar: 'Sports', color: 'blue' },
-  
-      { eventName: 'School Play', calendar: 'Kids', color: 'yellow' },
-      { eventName: 'Parent/Teacher Conference', calendar: 'Kids', color: 'yellow' },
-      { eventName: 'Pick up from Soccer Practice', calendar: 'Kids', color: 'yellow' },
-      { eventName: 'Ice Cream Night', calendar: 'Kids', color: 'yellow' },
-  
-      { eventName: 'Free Tamale Night', calendar: 'Other', color: 'green' },
-      { eventName: 'Bowling Team', calendar: 'Other', color: 'green' },
-      { eventName: 'Teach Kids to Code', calendar: 'Other', color: 'green' },
-      { eventName: 'Startup Weekend', calendar: 'Other', color: 'green' }
     ];
   
-    function addDate(ev) {
-      
-    }
-  
     var calendar = new Calendar('#calendar', data);
+
+    var list = new SelfCareList('#list', data);
 }();

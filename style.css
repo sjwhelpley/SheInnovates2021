@@ -8,7 +8,6 @@ body {
     overflow: hidden;
     font-family: 'HelveticaNeue-UltraLight', 'Helvetica Neue UltraLight', 'Helvetica Neue', Arial, Helvetica, sans-serif;
     font-weight: 100;
-    color: rgba(255, 255, 255, 1);
     margin: 0;
     padding: 0;
     -webkit-touch-callout: none;
@@ -27,6 +26,7 @@ body {
     margin: 0 auto;
     height: 570px;
     overflow: hidden;
+    color: rgba(255, 255, 255, 1);
 }
 
 .header {
